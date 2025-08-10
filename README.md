@@ -1,4 +1,4 @@
-# My Tax Tracker - Full Stack Application
+# My Tax Tracker - FullStack Application
 
 A comprehensive full-stack tax tracking application built with **FastAPI (Python)** backend and **React** frontend, featuring AWS Cognito authentication, DynamoDB storage, and S3 file management.
 
@@ -71,8 +71,13 @@ cd my-tax-tracker
    # Required: S3 Bucket
    S3_BUCKET=your_s3_bucket_name
    
-   # Optional: Customize URLs (defaults work for local development)
-   REDIRECT_URI=http://localhost:3000/auth/callback
+   # Required: Frontend Configuration
+   VITE_API_LOGIN_URL=http://localhost:8000/auth/login
+   VITE_API_LOGOUT_URL=http://localhost:8000/auth/logout
+   VITE_API_BASE_URL=http://localhost:8000
+   
+   # Required: Backend Configuration
+   REDIRECT_URI=http://localhost:3000/
    ALLOW_ORIGINS=http://localhost:3000,http://localhost:8000
    ```
 
@@ -93,15 +98,26 @@ docker-compose up --build -d
 
 ## 🔧 Development Setup
 
-### Running Backend Only
+### Running with Docker (Recommended)
 ```bash
+# Start all services
+docker-compose up --build
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+### Running Individual Services
+```bash
+# Backend only
 cd backend-app/backend
 docker build -t tax-tracker-backend .
 docker run -p 8000:8000 --env-file ../../.env tax-tracker-backend
-```
 
-### Running Frontend Only
-```bash
+# Frontend only
 cd frontend-app/frontend/my-tax-tracker-fe
 docker build -t tax-tracker-frontend .
 docker run -p 3000:3000 --env-file ../../../.env tax-tracker-frontend
@@ -189,6 +205,12 @@ docker-compose config
 docker-compose exec backend env | grep AWS
 ```
 
+#### CORS Issues
+If you're getting CORS errors:
+1. Ensure `ALLOW_ORIGINS` includes `http://localhost:3000`
+2. Check that the backend CORS middleware is properly configured
+3. Restart containers after making CORS changes
+
 #### AWS Credentials Issues
 - Ensure your AWS credentials have the necessary permissions
 - Verify the region matches your AWS resources
@@ -232,11 +254,13 @@ my-tax-tracker/
 │           ├── package.json      # Node.js dependencies
 │           └── Dockerfile        # Frontend container
 ├── docker-compose.yml           # Service orchestration
-├── .env.example                 # Environment template
+├── .env                         # Environment variables (create from .env.example)
 └── README.md                    # This file
 ```
 
-### 6. Testing Script
+## 🧪 Testing Scripts
+
+### Test Setup Script
 ```bash:my-tax-tracker/test-setup.sh
 #!/bin/bash
 
@@ -309,7 +333,7 @@ echo "🔍 To view logs: docker-compose logs -f"
 echo "🛑 To stop: docker-compose down"
 ```
 
-### 7. Startup Script
+### Startup Script
 ```bash:my-tax-tracker/start.sh
 #!/bin/bash
 
@@ -370,10 +394,6 @@ echo "   Restart:      docker-compose restart"
 ✅ **Documentation**: Professional README with clear instructions  
 ✅ **Testing**: Automated setup verification  
 ✅ **Production Ready**: Proper environment management and security  
-
-This setup will make it incredibly easy for employers to see your application in action, demonstrating both your technical skills and your ability to create professional, deployable applications. The comprehensive documentation shows you understand the importance of clear communication and user experience, which are crucial skills in any development role.
-
-Would you like me to help you test this setup or make any adjustments to the configuration?
 
 ## 🔒 Security Considerations
 
