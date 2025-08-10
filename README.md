@@ -2,7 +2,7 @@
 
 A comprehensive full-stack tax tracking application built with **FastAPI (Python)** backend and **React** frontend, featuring AWS Cognito authentication, DynamoDB storage, and S3 file management.
 
-##  Features
+## Features
 
 - **User Authentication**: Secure login/logout with AWS Cognito
 - **Receipt Management**: Upload, store, and organize tax receipts
@@ -81,7 +81,28 @@ cd my-tax-tracker
    ALLOW_ORIGINS=http://localhost:3000,http://localhost:8000
    ```
 
-### Step 3: Run with Docker Compose
+### Step 3: Make Scripts Executable
+```bash
+# Make both scripts executable
+chmod +x start.sh
+chmod +x test-setup.sh
+```
+
+### Step 4: Start the Application
+```bash
+# Run the start script (this will start everything and run tests)
+./start.sh
+```
+
+### Step 5: Access the Application
+- **Frontend**: http://localhost:3000
+- **Backend API**: http://localhost:8000
+- **API Documentation**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+## 🔧 Alternative Startup Methods
+
+### Option 1: Using Docker Compose Directly
 ```bash
 # Build and start all services
 docker-compose up --build
@@ -90,87 +111,42 @@ docker-compose up --build
 docker-compose up --build -d
 ```
 
-### Step 4: Access the Application
-- **Frontend**: http://localhost:3000
-- **Backend API**: http://localhost:8000
-- **API Documentation**: http://localhost:8000/docs
-- **Health Check**: http://localhost:8000/health
-
-## 🔧 Development Setup
-
-### Running with Docker (Recommended)
-```bash
-# Start all services
-docker-compose up --build
-
-# View logs
-docker-compose logs -f
-
-# Stop services
-docker-compose down
-```
-
-### Running Individual Services
+### Option 2: Using Individual Docker Commands
 ```bash
 # Backend only
 cd backend-app/backend
 docker build -t tax-tracker-backend .
 docker run -p 8000:8000 --env-file ../../.env tax-tracker-backend
 
-# Frontend only
+# Frontend only (in another terminal)
 cd frontend-app/frontend/my-tax-tracker-fe
 docker build -t tax-tracker-frontend .
 docker run -p 3000:3000 --env-file ../../../.env tax-tracker-frontend
 ```
 
-### Local Development (without Docker)
-```bash
-# Backend
-cd backend-app/backend
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
-
-# Frontend
-cd frontend-app/frontend/my-tax-tracker-fe
-npm install
-npm run dev
-```
-
 ## 🧪 Testing the Application
 
-### 1. Health Check
-Visit http://localhost:8000/health to verify the backend is running:
-```json
-{
-  "status": "healthy",
-  "environment": "dev"
-}
+### Automatic Testing (Recommended)
+The `start.sh` script automatically runs all tests for you. If you want to run tests manually:
+
+```bash
+# Run tests manually
+./test-setup.sh
 ```
 
-### 2. API Documentation
-Visit http://localhost:8000/docs to see the interactive API documentation.
-
-### 3. Frontend Loading
-Visit http://localhost:3000 to ensure the React app loads properly.
-
-### 4. Authentication Flow
-1. Click "Login" on the frontend
-2. You should be redirected to the backend auth endpoint
-3. Check browser console for any errors
-
-### 5. Docker Container Status
+### Manual Testing
 ```bash
-# Check running containers
+# Check if containers are running
 docker-compose ps
 
 # View logs
-docker-compose logs backend
-docker-compose logs frontend
+docker-compose logs -f
 
-# Check container health
-docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+# Test backend health
+curl http://localhost:8000/health
+
+# Test frontend
+curl http://localhost:3000
 ```
 
 ## 🐛 Troubleshooting
