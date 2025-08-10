@@ -1,20 +1,15 @@
-import logging
-import sys
-import os
-
-# Add the current directory to Python path
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from mangum import Mangum
 from starlette.middleware.sessions import SessionMiddleware
-
 from src.config import SECRET_KEY
 from src.routers.auth import auth_router
 from src.routers.receipts import receipts_router
 
+
+import logging
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
@@ -27,9 +22,10 @@ app.add_middleware(
     same_site="lax",
     https_only=False,
 )
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["http://localhost:3000", "http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

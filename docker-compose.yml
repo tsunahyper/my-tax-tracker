@@ -14,11 +14,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-      - RECEIPT_TABLE=${RECEIPT_TABLE}
-      - BLACKLIST_TOKEN_TABLE=${BLACKLIST_TOKEN_TABLE}
-      - S3_BUCKET=${S3_BUCKET}
       - REDIRECT_URI=${REDIRECT_URI}
-      - ALLOW_ORIGINS=${ALLOW_ORIGINS}
     env_file:
       - .env
     volumes:
@@ -28,7 +24,7 @@ services:
   frontend:
     build: ./frontend-app/frontend/my-tax-tracker-fe
     ports:
-      - "3000:3000"
+      - "3000:3000"  # Map host port 3000 to container port 3000
     environment:
       - VITE_API_BASE_URL=${VITE_API_BASE_URL}
       - VITE_API_LOGIN_URL=${VITE_API_LOGIN_URL}
@@ -39,5 +35,5 @@ services:
     restart: unless-stopped
 
 networks:
-  default:
-    name: tax-tracker-network
+  tax-tracker-network:
+    driver: bridge

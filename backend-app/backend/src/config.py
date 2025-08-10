@@ -24,7 +24,7 @@ RECEIPT_TABLE = os.getenv("RECEIPT_TABLE", "")
 BLACKLIST_TOKEN_TABLE = os.getenv("BLACKLIST_TOKEN_TABLE", "")
 S3_BUCKET = os.getenv("S3_BUCKET", "")
 REDIRECT_URI = os.getenv("REDIRECT_URI", "")
-ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", "*")
+ALLOW_ORIGINS = os.getenv("ALLOW_ORIGINS", "http://localhost:3000")
 
 # Handle ALLOW_ORIGIN parsing safely
 if ALLOW_ORIGINS and ALLOW_ORIGINS != "*":
