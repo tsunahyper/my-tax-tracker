@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend-app/backend
+    ports:
+      - "8000:8000"
+    environment:
+      - CLIENT_SECRET=${CLIENT_SECRET}
+      - CLIENT_ID=${CLIENT_ID}
+      - COGNITO_REGION=${COGNITO_REGION}
+      - COGNITO_USER_POOL_ID=${COGNITO_USER_POOL_ID}
+      - SECRET_KEY=${SECRET_KEY}
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+      - RECEIPT_TABLE=${RECEIPT_TABLE}
+      - BLACKLIST_TOKEN_TABLE=${BLACKLIST_TOKEN_TABLE}
+      - S3_BUCKET=${S3_BUCKET}
+      - REDIRECT_URI=${REDIRECT_URI}
+      - ALLOW_ORIGINS=${ALLOW_ORIGINS}
+    env_file:
+      - .env
+    volumes:
+      - ./backend-app/backend:/app
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend-app/frontend/my-tax-tracker-fe
+    ports:
+      - "3000:3000"
+    environment:
+      - VITE_API_BASE_URL=${VITE_API_BASE_URL}
+      - VITE_API_LOGIN_URL=${VITE_API_LOGIN_URL}
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+networks:
+  default:
+    name: tax-tracker-network
