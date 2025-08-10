@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import JSONResponse, RedirectResponse
 
-from config import (
+from src.config import (
     REDIRECT_URI,
     blacklist_token,
     generate_new_tokens,

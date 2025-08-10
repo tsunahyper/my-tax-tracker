@@ -1,6 +1,6 @@
 from pathlib import Path as PathLib
 
-from config import receipt_db
+from src.config import receipt_db
 
 
 def parse_textract_expense(response):

@@ -57,7 +57,6 @@ if CLIENT_ID and COGNITO_USER_POOL_ID:
 # Cache JWKS
 _jwks = None
 
-
 async def get_jwks():
     global _jwks
     if not JWKS_URL:
@@ -71,7 +70,6 @@ async def get_jwks():
             resp.raise_for_status()
             _jwks = resp.json()
     return _jwks
-
 
 async def verify_cognito_jwt(token: str) -> Dict:
     """Verifies a Cognito JWT token using the fetched JWKS."""
@@ -106,7 +104,6 @@ async def verify_cognito_jwt(token: str) -> Dict:
             detail=f"Token validation error: {e}",
         )
 
-
 async def get_current_user(request: Request):
     auth = request.headers.get("Authorization")
     token = None
@@ -128,7 +125,6 @@ async def get_current_user(request: Request):
         )
     return await verify_cognito_jwt(token)
 
-
 async def get_current_user_profile(request: Request):
     id_token = request.cookies.get("id_token")
     if not id_token:
@@ -144,7 +140,6 @@ async def get_current_user_profile(request: Request):
     )
     return decoded
 
-
 async def blacklist_token(token: str, expires_in: int = 3600, token_type: str = "access"):
     try:
         decoded = jwt.get_unverified_claims(token)
@@ -155,36 +150,41 @@ async def blacklist_token(token: str, expires_in: int = 3600, token_type: str = 
         else:
             expires_at = int((datetime.now(timezone.utc) + timedelta(seconds=expires_in)).timestamp())
         logout_time = datetime.now(timezone.utc).isoformat()
-        blacklist_token_db.put_item(
-            Item={
-                "token_jti": jti,
-                "logout_time": logout_time,
-                "expires_at": expires_at,
-                "token_type": token_type,
-            }
-        )
+        
+        # Only try to blacklist if we have a valid table
+        if blacklist_token_db:
+            blacklist_token_db.put_item(
+                Item={
+                    "token_jti": jti,
+                    "logout_time": logout_time,
+                    "expires_at": expires_at,
+                    "token_type": token_type,
+                }
+            )
     except Exception as e:
         print(f"Failed to blacklist token: {e}")
-
 
 async def is_token_blacklisted(token: str, token_type: str = None):
     try:
         decoded = jwt.get_unverified_claims(token)
         jti = decoded.get("jti", token)
-        response = blacklist_token_db.query(
-            KeyConditionExpression="token_jti = :jti",
-            ExpressionAttributeValues={":jti": jti},
-        )
-        items = response.get("Items", [])
-        if not items:
-            return False
-        if token_type:
-            return any(item.get("token_type") == token_type for item in items)
-        return True
+        
+        # Only check blacklist if we have a valid table
+        if blacklist_token_db:
+            response = blacklist_token_db.query(
+                KeyConditionExpression="token_jti = :jti",
+                ExpressionAttributeValues={":jti": jti},
+            )
+            items = response.get("Items", [])
+            if not items:
+                return False
+            if token_type:
+                return any(item.get("token_type") == token_type for item in items)
+            return True
+        return False
     except Exception as e:
         print(f"Failed to check blacklist: {e}")
         return False
-
 
 async def validate_refresh_token(token: str):
     # This should verify the refresh token (signature, expiry, etc.)
@@ -198,11 +198,13 @@ async def validate_refresh_token(token: str):
         print(f"Refresh token validation failed: {e}")
         return None
 
-
 async def generate_new_tokens(refresh_token: str):
     """
     Generate new tokens using Cognito's token endpoint with a refresh token.
     """
+    if not oauth:
+        return None, None
+    
     try:
         new_token_data = await oauth.oidc.fetch_access_token(
             grant_type="refresh_token",
@@ -217,27 +219,46 @@ async def generate_new_tokens(refresh_token: str):
         print(f"Failed to generate new tokens: {e}")
         return None, None
 
+# Initialize AWS resources only if credentials are provided
+s3 = None
+receipt_bucket = None
+dynamo = None
+receipt_db = None
+blacklist_token_db = None
+receipt_textract = None
 
-s3 = boto3.resource(
-    "s3",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_DEFAULT_REGION,
-)
-receipt_bucket = s3.Bucket(str(S3_BUCKET))
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and S3_BUCKET:
+    try:
+        s3 = boto3.resource(
+            "s3",
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_DEFAULT_REGION,
+        )
+        receipt_bucket = s3.Bucket(str(S3_BUCKET))
+    except Exception as e:
+        print(f"Failed to initialize S3: {e}")
 
-dynamo = boto3.resource(
-    "dynamodb",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_DEFAULT_REGION,
-)
-receipt_db = dynamo.Table(str(RECEIPT_TABLE))
-blacklist_token_db = dynamo.Table(str(BLACKLIST_TOKEN_TABLE))
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and RECEIPT_TABLE:
+    try:
+        dynamo = boto3.resource(
+            "dynamodb",
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_DEFAULT_REGION,
+        )
+        receipt_db = dynamo.Table(str(RECEIPT_TABLE))
+        blacklist_token_db = dynamo.Table(str(BLACKLIST_TOKEN_TABLE))
+    except Exception as e:
+        print(f"Failed to initialize DynamoDB: {e}")
 
-receipt_textract = boto3.client(
-    "textract",
-    aws_access_key_id=AWS_ACCESS_KEY_ID,
-    aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
-    region_name=AWS_DEFAULT_REGION,
-)
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY:
+    try:
+        receipt_textract = boto3.client(
+            "textract",
+            aws_access_key_id=AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
+            region_name=AWS_DEFAULT_REGION,
+        )
+    except Exception as e:
+        print(f"Failed to initialize Textract: {e}")

@@ -6,9 +6,9 @@ from boto3.dynamodb.conditions import Key
 from fastapi import APIRouter, Depends, File, HTTPException, Path, Query, UploadFile
 from fastapi.responses import JSONResponse, StreamingResponse
 
-from config import get_current_user, receipt_bucket, receipt_db, receipt_textract
-from models.receipts import ReceiptStatusUpdate, ReceiptUpdate
-from utils import get_unique_filename, parse_textract_expense
+from src.config import get_current_user, receipt_bucket, receipt_db, receipt_textract
+from src.models.receipts import ReceiptStatusUpdate, ReceiptUpdate
+from src.utils import get_unique_filename, parse_textract_expense
 
 receipts_router = APIRouter(prefix="/receipts")
 
