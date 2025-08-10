@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["src/*"]
+    }
+  },
+  "include": ["src", "my-tax-tracker-fe/src/components/Navbar.jsx", "my-tax-tracker-fe/src/atoms/AlertSubComponents.jsx"]
+}

@@ -1,0 +1,19 @@
+{
+    "dev": {
+        "app_function": "src.main.handler",
+        "aws_region": "ap-southeast-1",
+        "project_name": "my-tax-tracker",
+        "runtime": "python3.12",
+        "s3_bucket": "my-tax-tracker-dev-zappa",
+        "aws_environment_variables": { 
+            "STAGE": "dev",
+            "ENVIRONMENT": "dev"
+        },
+        "endpoint_configuration": ["REGIONAL"],
+        "manage_roles": false,
+        "keep_warm": false,
+        "num_retained_versions": 3,
+        "timeout_seconds": 30,
+        "memory_size": 512
+    }
+}
