@@ -1,6 +1,6 @@
 # My Tax Tracker - FullStack Application
 
-A comprehensive full-stack tax tracking application built with **FastAPI (Python)** backend and **React** frontend, featuring AWS Cognito authentication, DynamoDB storage, and S3 file management.
+A comprehensive fullstack malaysian tax tracking application built with **FastAPI (Python)** backend and **React** frontend, featuring AWS Cognito authentication, DynamoDB storage, and S3 file management.
 
 ## Features
 
@@ -24,10 +24,7 @@ A comprehensive full-stack tax tracking application built with **FastAPI (Python
 
 ### Frontend
 - **React 19** - Latest React with modern hooks
-- **Vite** - Fast build tool and dev server
 - **Tailwind CSS** - Utility-first CSS framework
-- **React Router** - Client-side routing
-- **Axios** - HTTP client for API calls
 
 ## 📋 Prerequisites
 
@@ -151,18 +148,6 @@ curl http://localhost:3000
 
 ## 🐛 Troubleshooting
 
-### Common Issues
-
-#### Port Already in Use
-```bash
-# Check what's using the ports
-lsof -i :3000
-lsof -i :8000
-
-# Kill processes if needed
-kill -9 <PID>
-```
-
 #### Docker Build Issues
 ```bash
 # Clean Docker cache
@@ -170,15 +155,6 @@ docker system prune -a
 
 # Rebuild without cache
 docker-compose build --no-cache
-```
-
-#### Environment Variable Issues
-```bash
-# Verify environment variables are loaded
-docker-compose config
-
-# Check individual service environment
-docker-compose exec backend env | grep AWS
 ```
 
 #### CORS Issues
@@ -231,138 +207,39 @@ my-tax-tracker/
 │           └── Dockerfile        # Frontend container
 ├── docker-compose.yml           # Service orchestration
 ├── .env                         # Environment variables (create from .env.example)
+├── start.sh                     # Startup script
+├── test-setup.sh                # Testing script
 └── README.md                    # This file
 ```
 
-## 🧪 Testing Scripts
+## 🎯 Key Changes Made:
 
-### Test Setup Script
-```bash:my-tax-tracker/test-setup.sh
-#!/bin/bash
+1. **Added chmod instructions** - Step 3 now includes making scripts executable
+2. **Simplified startup** - Focus on the `./start.sh` script as the main method
+3. **Removed complex local development** - Kept only the essential Docker methods
+4. **Streamlined testing** - Emphasized automatic testing via the start script
+5. **Clearer flow** - Step-by-step process is now much easier to follow
 
-echo " Testing My Tax Tracker Setup"
-echo "================================"
+## 🚀 Now the flow is super simple:
 
-# Check if Docker is running
-echo "1. Checking Docker status..."
-if ! docker info > /dev/null 2>&1; then
-    echo "❌ Docker is not running. Please start Docker and try again."
-    exit 1
-fi
-echo "✅ Docker is running"
+1. **Clone repo**
+2. **Set up .env**
+3. **Make scripts executable**: `chmod +x *.sh`
+4. **Run `./start.sh`**
+5. **Access your app**
 
-# Check if containers are running
-echo "2. Checking container status..."
-if ! docker-compose ps | grep -q "Up"; then
-    echo "❌ Containers are not running. Starting them now..."
-    docker-compose up --build -d
-    sleep 10
-fi
-
-# Test backend health
-echo "3. Testing backend health..."
-BACKEND_HEALTH=$(curl -s http://localhost:8000/health 2>/dev/null)
-if [[ $BACKEND_HEALTH == *"healthy"* ]]; then
-    echo "✅ Backend is healthy: $BACKEND_HEALTH"
-else
-    echo "❌ Backend health check failed"
-fi
-
-# Test frontend
-echo "4. Testing frontend..."
-FRONTEND_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000)
-if [[ $FRONTEND_RESPONSE == "200" ]]; then
-    echo "✅ Frontend is responding (HTTP $FRONTEND_RESPONSE)"
-else
-    echo "❌ Frontend is not responding properly (HTTP $FRONTEND_RESPONSE)"
-fi
-
-# Test API documentation
-echo "5. Testing API documentation..."
-API_DOCS=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/docs)
-if [[ $API_DOCS == "200" ]]; then
-    echo "✅ API documentation is accessible"
-else
-    echo "❌ API documentation is not accessible (HTTP $API_DOCS)"
-fi
-
-# Check container logs for errors
-echo "6. Checking for container errors..."
-ERRORS=$(docker-compose logs --tail=20 | grep -i "error\|exception\|failed" | wc -l)
-if [[ $ERRORS -eq 0 ]]; then
-    echo "✅ No recent errors found in container logs"
-else
-    echo "⚠️  Found $ERRORS potential errors in container logs"
-    echo "Recent logs:"
-    docker-compose logs --tail=10
-fi
-
-echo ""
-echo "🎉 Setup testing complete!"
-echo ""
-echo "📱 Access your application:"
-echo "   Frontend: http://localhost:3000"
-echo "   Backend:  http://localhost:8000"
-echo "   API Docs: http://localhost:8000/docs"
-echo ""
-echo "🔍 To view logs: docker-compose logs -f"
-echo "🛑 To stop: docker-compose down"
-```
-
-### Startup Script
-```bash:my-tax-tracker/start.sh
-#!/bin/bash
-
-echo "🚀 Starting My Tax Tracker Application"
-echo "====================================="
-
-# Check if .env file exists
-if [ ! -f .env ]; then
-    echo "❌ .env file not found!"
-    echo "Please copy .env.example to .env and configure your environment variables."
-    exit 1
-fi
-
-# Start the application
-echo "🐳 Starting Docker containers..."
-docker-compose up --build -d
-
-echo "⏳ Waiting for services to start..."
-sleep 15
-
-echo "🧪 Running health checks..."
-./test-setup.sh
-
-echo ""
-echo " Application should now be running!"
-echo "   Frontend: http://localhost:3000"
-echo "   Backend:  http://localhost:8000"
-echo ""
-echo " Useful commands:"
-echo "   View logs:    docker-compose logs -f"
-echo "   Stop app:     docker-compose down"
-echo "   Restart:      docker-compose restart"
-```
+Much cleaner and easier to follow! 🎉
 
 ## 🎯 How to Use This Setup
 
-### For Employers/Reviewers:
-
 1. **Clone your repository**
 2. **Copy `.env.example` to `.env`** and fill in the required AWS credentials
-3. **Run `./start.sh`** to start everything
-4. **Visit http://localhost:3000** to see your app running
-5. **Check http://localhost:8000/docs** to see your API documentation
+3. **Make scripts executable**: `chmod +x *.sh`
+4. **Run `./start.sh`** to start everything
+5. **Visit http://localhost:3000** to see your app running
+6. **Check http://localhost:8000/docs** to see your API documentation
 
-### Key Benefits of This Setup:
-
-- **Professional**: Clean, production-ready Docker configuration
-- **Easy to Follow**: Step-by-step instructions anyone can follow
-- **Comprehensive**: Covers all edge cases and troubleshooting
-- **Portfolio-Ready**: Shows your DevOps and deployment skills
-- **Testing Included**: Built-in health checks and testing scripts
-
-### What This Demonstrates:
+### Project Initial Objectives:
 
 ✅ **Full-Stack Development**: Python backend + React frontend  
 ✅ **DevOps Skills**: Docker, Docker Compose, containerization  
@@ -371,17 +248,7 @@ echo "   Restart:      docker-compose restart"
 ✅ **Testing**: Automated setup verification  
 ✅ **Production Ready**: Proper environment management and security  
 
-## 🔒 Security Considerations
-
-- **Environment Variables**: Never commit `.env` files to version control
-- **AWS Credentials**: Use IAM roles with minimal required permissions
-- **CORS**: Configure `ALLOW_ORIGINS` appropriately for production
-- **HTTPS**: Enable HTTPS in production environments
-- **Secrets Management**: Use AWS Secrets Manager for production deployments
-
-## 🚀 Production Deployment
-
-For production deployment, consider:
+## 🚀 For Production Deployment:
 
 1. **AWS ECS/Fargate** for container orchestration
 2. **Application Load Balancer** for traffic distribution
@@ -389,17 +256,38 @@ For production deployment, consider:
 4. **RDS/ElastiCache** for additional data storage needs
 5. **CloudWatch** for monitoring and logging
 
-## 📚 Additional Resources
+## 📚 Resources
 
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [React Documentation](https://react.dev/)
-- [AWS Cognito Documentation](https://docs.aws.amazon.com/cognito/)
 - [Docker Documentation](https://docs.docker.com/)
+- [AWS Cognito Documentation](https://docs.aws.amazon.com/cognito/)
+
+## 📱 MY Tax Tracker Application 
+
+### Login & Authentication
+![Cognito Login](guide/cognito-login.png)
+*AWS Cognito authentication flow*
+
+![Login Page](guide/login.png)
+*Application login interface*
+
+### Dashboard & Navigation
+![Dashboard](guide/dashboard.png)
+*Main dashboard with navigation*
+
+### User Management
+![User Profile](guide/user.png)
+*User profile and settings*
+
+### Receipt Management
+![Receipts](guide/receipts.png)
+*Receipt upload and management interface*
+
+---
 
 ## 📄 License
 
 This project is open source and available under the [MIT License](LICENSE).
 
 ---
-
-**Built with ❤️ using modern web technologies**
